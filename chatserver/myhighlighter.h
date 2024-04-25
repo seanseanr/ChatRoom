@@ -16,7 +16,7 @@ protected:
         keywordFormat.setForeground(Qt::blue);
         keywordFormat.setFontWeight(QFont::Bold);
 
-        QRegExp keywordPattern("\\b(" + keyword + ")\\b");
+        QRegExp keywordPattern("^\\b" + keyword + "\\b+.*");
         int index = text.indexOf(keywordPattern);
         while(index >= 0)
         {

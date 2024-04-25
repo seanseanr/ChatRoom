@@ -14,9 +14,11 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-        myhighlighter.cpp
+        myhighlighter.cpp \
+    chatserver.cpp
 
 HEADERS  += mainwindow.h \
         myhighlighter.h \
+    chatserver.h
 
 FORMS    += mainwindow.ui

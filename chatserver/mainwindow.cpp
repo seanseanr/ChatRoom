@@ -1,11 +1,14 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QFileDialog>
+#include <QTextStream>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    server = new ChatServer(this);
     setupFilemenu();
     setupEditor();
 }
@@ -19,7 +22,7 @@ void MainWindow::setupEditor()
     editor->setFontPointSize(10);
     editor->setReadOnly(true);
     editor->setFixedHeight(175);
-    MyHighlighter myhighlighter(editor->document());
+    MyHighlighter *highlighter = new MyHighlighter(editor->document());
     lineditor->setFont(QFont("courier"));
     lineditor->setMinimumSize(10, 10);
     lineditor->setFixedHeight(25);
@@ -48,21 +51,31 @@ void MainWindow::setupFilemenu()
 
 void MainWindow::newMeDisplay()
 {
-#define server_name "BigOne: "
-    editor->append(server_name + lineditor->text());
+    QString s = server_name + lineditor->text();
+    editor->append(s);
+    server->dispatchLine(s);
+    lineditor->clear();
 }
 
 void MainWindow::newFile()
 {
-
+    editor->clear();
 }
 
 void MainWindow::saveFile()
 {
-
+    QString fileName = QFileDialog::getSaveFileName(0, "Save to File", "D:\\", "Text File (*.txt)");
+    QFile file(fileName);
+    if(!fileName.isEmpty() && file.open(QFile::Text | QFile::Truncate | QFile::WriteOnly))
+    {
+        QTextStream out(&file);
+        QString text = editor->toPlainText();
+        out<<text;
+    }
 }
 
 MainWindow::~MainWindow()
 {
+
     delete ui;
 }

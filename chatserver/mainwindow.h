@@ -10,7 +10,7 @@
 #include <myhighlighter.h>
 #include <QVBoxLayout>
 #include <QLineEdit>
-
+#include "chatserver.h"
 namespace Ui {
 class MainWindow;
 }
@@ -22,7 +22,8 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    
+#define server_name "BigOne: "
+
 private slots:
     void newFile();
     void saveFile();
@@ -45,6 +46,7 @@ private:
         _TOTALACTIONS
     };
     QAction *act[_TOTALACTIONS];
+    ChatServer *server;
 };
 
 #endif // MAINWINDOW_H
