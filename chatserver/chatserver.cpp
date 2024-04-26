@@ -1,9 +1,15 @@
 #include "chatserver.h"
+#include "mainwindow.h"
 #include <QTcpSocket>
 #include <QString>
+
+class MainWindow;
+extern MainWindow* w;
+
 ChatServer::ChatServer(QObject *parent) :
     QTcpServer(parent)
 {
+    listen(QHostAddress::LocalHost, 5000);
 }
 
 void ChatServer::incomingConnection(int socketfd)
@@ -21,9 +27,9 @@ void ChatServer::readyRead()
     QTcpSocket *client = (QTcpSocket*)sender();
 
     //QString username = users[client];
-    while(client->canReadLine())
+    do
     {
-        QString line = QString::fromUtf8(client->readLine()).trimmed();
+        QString line = QString::fromUtf8(client->readLine());
 
         if(line.contains(LOGIN_SIGN))
         {
@@ -32,13 +38,18 @@ void ChatServer::readyRead()
         }
         else
         {
-            QString username_ = users[client] + ": ";
             foreach(QTcpSocket *socket, clients)
             {
-                socket->write(QString(username_ + line).toUtf8());
+                QString s = users[client] + ": " + line;
+                w->appendEditorFromclient(s);
+                if(socket != client)
+                {
+                    QString username_ = users[client] + ": ";
+                    socket->write(QString(username_ + line).toUtf8());
+                }
             }
         }
-    }
+    }while(client->canReadLine());
 }
 
 void ChatServer::disconnected()

@@ -4,14 +4,15 @@
 #include <QSyntaxHighlighter>
 #include <QTextDocument>
 #include <QTextEdit>
+#include <QTcpSocket>
+
 class MyHighlighter : public QSyntaxHighlighter
 {
 public:
-    explicit MyHighlighter(QTextDocument* parent = 0): QSyntaxHighlighter(parent){}
+    explicit MyHighlighter(QTextDocument* parent = 0, const QString &k = QString()): QSyntaxHighlighter(parent) {keyword = k;}
 protected:
     void highlightBlock(const QString& text)
     {
-        QString keyword = "BigOne";
         QTextCharFormat keywordFormat;
         keywordFormat.setForeground(Qt::blue);
         keywordFormat.setFontWeight(QFont::Bold);
@@ -27,6 +28,9 @@ protected:
 
 
     }
+
+private:
+    QString keyword;
 };
 
 #endif // MYHIGHLIGHTER_H

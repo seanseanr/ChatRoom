@@ -22,15 +22,21 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-#define server_name "BigOne: "
+    bool loggined = false;
+    QString username;
+    void appendEditorFromclient(QString s);
+#define server_name "BigOne"
 
 private slots:
     void newFile();
     void saveFile();
     void newMeDisplay();
+    void readyRead();
+    void connected();
 
 private:
     Ui::MainWindow *ui;
+    QTcpSocket *socket;
     void setupEditor();
     void setupFilemenu();
     void setupServer();
