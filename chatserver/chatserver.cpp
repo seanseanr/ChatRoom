@@ -33,19 +33,19 @@ void ChatServer::readyRead()
 
         if(line.contains(LOGIN_SIGN))
         {
-            QString username = QString(line.data() + SIGN_LEN);
+            QString username = QString(line.data() + SIGN_LEN - 1);
             users[client] = username;
         }
         else
         {
+            QString s = users[client] + ": " + line;
+            w->appendEditorFromclient(s);
             foreach(QTcpSocket *socket, clients)
             {
-                QString s = users[client] + ": " + line;
-                w->appendEditorFromclient(s);
                 if(socket != client)
                 {
                     QString username_ = users[client] + ": ";
-                    socket->write(QString(username_ + line).toUtf8());
+                    socket->write((username_+line).toUtf8());
                 }
             }
         }

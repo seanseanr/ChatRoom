@@ -114,7 +114,8 @@ void MainWindow::newMeDisplay()
     {
         QString s = username + ": " + lineditor->text();
         editor->append(s);
-        socket->write(s.toUtf8());
+        //socket->write(s.toUtf8());
+        socket->write(lineditor->text().toUtf8());
     }
 #else
     if(!lineditor->text().isEmpty())
