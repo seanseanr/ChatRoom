@@ -1,0 +1,12 @@
+INPUT(
+./release\main.o
+./release\mainwindow.o
+./release\myhighlighter.o
+./release\chatserver.o
+./release\logindialog.o
+./release\pictureserver.o
+./release\moc_mainwindow.o
+./release\moc_chatserver.o
+./release\moc_logindialog.o
+./release\moc_pictureserver.o
+);

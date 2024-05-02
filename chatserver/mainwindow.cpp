@@ -28,8 +28,10 @@ MainWindow::MainWindow(QWidget *parent) :
     {
         username.clear();
     }
+    loginDialog->close();
     #else
     server = new ChatServer(this);
+    picserver = new pictureserver(this);
     #endif
     setupFilemenu();
     setupEditor();
@@ -38,15 +40,45 @@ MainWindow::MainWindow(QWidget *parent) :
 #else
     setWindowTitle(server_name);
 #endif
+    setupPic();
+}
+
+void MainWindow::Picconnected()
+{
+
+}
+
+void MainWindow::PicreadyRead()
+{
+    do
+    {
+        written_bytes += picsocket->bytesAvailable();
+        ar.append(picsocket->readAll());
+
+    }while(picsocket->bytesAvailable());
+
+    if(written_bytes >= expected_bytes)
+    {
+        QImage img("client_tmp.png");
+        img.fromData(ar);
+        img.save("client_tmp.png");
+        ar.clear();
+    }
 }
 
 void MainWindow::connected()
 {
-    if(!loggined)
-    {
+    //if(!loggined)
+    //{
         if(socket->write(QString(LOGIN_SIGN + username).toUtf8()) >=0)
         {
-            loggined = true;
+            socket->waitForBytesWritten();
+            //loggined = true;
+            picsocket = new QTcpSocket(this);
+            connect(picsocket, SIGNAL(readyRead()), this, SLOT(PicreadyRead()));
+            connect(picsocket, SIGNAL(connected()), this, SLOT(Picconnected()));
+            picsocket->connectToHost(QHostAddress::LocalHost, 5050);
+
         }
         else
         {
@@ -54,7 +86,7 @@ void MainWindow::connected()
             messageBox.critical(0,"Error","An error has occured !");
             messageBox.setFixedSize(500,200);
         }
-    }
+    //}
 }
 
 void MainWindow::readyRead()
@@ -63,7 +95,10 @@ void MainWindow::readyRead()
     {
         QString line = QString::fromUtf8(socket->readLine().trimmed());
         editor->append(line);
-        //newMeDisplay();
+        //QByteArray arr = socket->readAll();
+        //QString tmpfileName = QApplication::applicationDirPath() + "/" + QString("tmp%1.png").arg(++tmp_idx);
+        //QFile file(tmpfileName);
+        //editor->append(QString("<img src=\"%1\"/>").arg(tmpfileName));
     }while(socket->canReadLine());
 }
 
@@ -143,6 +178,42 @@ void MainWindow::saveFile()
         QString text = editor->toPlainText();
         out<<text;
     }
+}
+
+void MainWindow::getPicName()
+{
+    QByteArray data;
+    QString picName = QFileDialog::getOpenFileName(this, "Select Picture", "D:\\", "Picture File (*.png *.jpg *.bmp)");
+    if(picName.isEmpty())
+        return;
+    //QFile file(picName);
+    //file.open(QFile::ReadOnly);
+    //data.append(file.readAll().data());
+    QString newFileName = QString(picName.data() + picName.lastIndexOf("/") + 1);
+    QString newName = QApplication::applicationDirPath() + "/" + newFileName;
+#ifdef CHAT_CLIENT
+    editor->append(username + ": ");
+    editor->append(QString("<img src=\"%1\" />").arg(picName));
+    socket->write(QString("<img src=\"%1\" />").arg(picName).toUtf8());
+#else
+    QString s_with_servername = QString(server_name) + ": " +QString("<img src=\"%1\" />").arg(picName);
+    editor->append(s_with_servername);
+    server->dispatchLine(s_with_servername);
+#endif
+    //picserver->expected_bytes = file.size();
+    //picserver->written_size = 0;
+    //picsocket->write(data);
+    //picsocket->flush();
+    //picsocket.close();
+    //picsocket->waitForBytesWritten();
+}
+
+void MainWindow::setupPic()
+{
+    act[_OPENACTION] = new QAction("Select Picture", this);
+    connect(act[_OPENACTION], SIGNAL(triggered()) , this, SLOT(getPicName()));
+    menu->addAction(act[_OPENACTION]);
+    //editor->append("<img src=copy.png /img>");
 }
 
 void MainWindow::appendEditorFromclient(QString s)
