@@ -29,10 +29,9 @@ MainWindow::MainWindow(QWidget *parent) :
         username.clear();
     }
     loginDialog->close();
-    #else
+    #endif
     server = new ChatServer(this);
     picserver = new pictureserver(this);
-    #endif
     setupFilemenu();
     setupEditor();
 #ifdef CHAT_CLIENT
@@ -59,9 +58,9 @@ void MainWindow::PicreadyRead()
 
     if(written_bytes >= expected_bytes)
     {
-        QImage img("client_tmp.png");
-        img.fromData(ar);
-        img.save("client_tmp.png");
+        QFile img("D:/client_tmp.png");
+        img.open(QFile::Truncate | QFile::WriteOnly);
+        img.write(ar);
         ar.clear();
     }
 }
@@ -85,6 +84,7 @@ void MainWindow::connected()
             QMessageBox messageBox;
             messageBox.critical(0,"Error","An error has occured !");
             messageBox.setFixedSize(500,200);
+            messageBox.show();
         }
     //}
 }
@@ -186,26 +186,28 @@ void MainWindow::getPicName()
     QString picName = QFileDialog::getOpenFileName(this, "Select Picture", "D:\\", "Picture File (*.png *.jpg *.bmp)");
     if(picName.isEmpty())
         return;
-    //QFile file(picName);
-    //file.open(QFile::ReadOnly);
-    //data.append(file.readAll().data());
+    QFile file(picName);
+    file.open(QFile::ReadOnly);
+    data.append(file.readAll());
     QString newFileName = QString(picName.data() + picName.lastIndexOf("/") + 1);
     QString newName = QApplication::applicationDirPath() + "/" + newFileName;
 #ifdef CHAT_CLIENT
     editor->append(username + ": ");
     editor->append(QString("<img src=\"%1\" />").arg(picName));
     socket->write(QString("<img src=\"%1\" />").arg(picName).toUtf8());
+    picserver->expected_bytes = file.size();
+    picserver->written_size = 0;
+    picsocket->write(data);
+    picsocket->flush();
+    picsocket->waitForBytesWritten();
 #else
     QString s_with_servername = QString(server_name) + ": " +QString("<img src=\"%1\" />").arg(picName);
     editor->append(s_with_servername);
     server->dispatchLine(s_with_servername);
+    expected_bytes = file.size();
+    written_bytes = 0;
+    //picserver->dispatchPic(data);
 #endif
-    //picserver->expected_bytes = file.size();
-    //picserver->written_size = 0;
-    //picsocket->write(data);
-    //picsocket->flush();
-    //picsocket.close();
-    //picsocket->waitForBytesWritten();
 }
 
 void MainWindow::setupPic()

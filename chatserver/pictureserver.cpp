@@ -1,6 +1,6 @@
 #include "pictureserver.h"
 #include <QTcpSocket>
-
+#include <QFile>
 pictureserver::pictureserver(QObject *parent) :
     QTcpServer(parent)
 {
@@ -24,15 +24,15 @@ void pictureserver::readyRead()
 
     do
     {
-        written_size += client->bytesAvailable();
+        written_size += client->bytesToWrite();
         ba.append(client->readAll());
 
     }while(client->bytesAvailable() > 0);
     if(written_size >= expected_bytes)
     {
-        QImage img("D:/server_tmp.png");
-        img.fromData(ba,"PNG");
-        img.save("D:/server_tmp.png");
+        QFile img("D:/server_tmp.png");
+        img.open(QFile::Truncate | QFile::WriteOnly);
+        img.write(ba);
         ba.clear();
     }
 }
@@ -44,6 +44,18 @@ void pictureserver::disconnected()
     clients.remove(client);
 
     users.remove(client);
+}
+
+void pictureserver::dispatchPic(QByteArray &ba)
+{
+    for(QTcpSocket *client: clients)
+    {
+        expected_bytes = ba.size();
+        written_size = 0;
+        client->write(ba);
+        client->flush();
+        client->waitForBytesWritten();
+    }
 }
 
 pictureserver::~pictureserver()
