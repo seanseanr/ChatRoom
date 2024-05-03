@@ -46,7 +46,7 @@ void ChatServer::readyRead()
                 if(socket != client)
                 {
                     QString username_ = users[client] + ": ";
-                    socket->write((username_+line).toUtf8());
+                    socket->write((username_+line).toAscii());
                 }
             }
         }
@@ -66,7 +66,7 @@ void ChatServer::dispatchLine(QString line)
 {
     foreach(QTcpSocket *socket, clients)
     {
-        socket->write(line.toUtf8());
+        socket->write(line.toAscii());
     }
 }
 

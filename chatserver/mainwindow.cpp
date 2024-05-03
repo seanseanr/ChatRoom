@@ -69,7 +69,7 @@ void MainWindow::connected()
 {
     //if(!loggined)
     //{
-        if(socket->write(QString(LOGIN_SIGN + username).toUtf8()) >=0)
+        if(socket->write(QString(LOGIN_SIGN + username).toAscii()) >=0)
         {
             socket->waitForBytesWritten();
             //loggined = true;
@@ -149,8 +149,8 @@ void MainWindow::newMeDisplay()
     {
         QString s = username + ": " + lineditor->text();
         editor->append(s);
-        //socket->write(s.toUtf8());
-        socket->write(lineditor->text().toUtf8());
+        //socket->write(s.toAscii());
+        socket->write(lineditor->text().toAscii());
     }
 #else
     if(!lineditor->text().isEmpty())
@@ -194,7 +194,7 @@ void MainWindow::getPicName()
 #ifdef CHAT_CLIENT
     editor->append(username + ": ");
     editor->append(QString("<img src=\"%1\" />").arg(picName));
-    socket->write(QString("<img src=\"%1\" />").arg(picName).toUtf8());
+    socket->write(QString("<img src=\"%1\" />").arg(picName).toAscii());
     picserver->expected_bytes = file.size();
     picserver->written_size = 0;
     picsocket->write(data);

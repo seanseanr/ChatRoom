@@ -4,7 +4,7 @@
 #include <QTcpServer>
 #include <QImage>
 
-class ChatServer;
+//class ChatServer;
 
 class pictureserver : public QTcpServer
 {
