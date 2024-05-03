@@ -170,12 +170,12 @@ void MainWindow::newFile()
 
 void MainWindow::saveFile()
 {
-    QString fileName = QFileDialog::getSaveFileName(0, "Save to File", "D:\\", "Text File (*.txt)");
+    QString fileName = QFileDialog::getSaveFileName(0, "Save to File", "D:\\", "HTML File (*.html)");
     QFile file(fileName);
     if(!fileName.isEmpty() && file.open(QFile::Text | QFile::Truncate | QFile::WriteOnly))
     {
         QTextStream out(&file);
-        QString text = editor->toPlainText();
+        QString text = editor->toHtml();
         out<<text;
     }
 }
