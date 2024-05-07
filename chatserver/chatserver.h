@@ -3,6 +3,7 @@
 
 #include <QTcpServer>
 
+
 class ChatServer : public QTcpServer
 {
     Q_OBJECT
@@ -15,6 +16,8 @@ public:
     
 protected:
     void incomingConnection(int socketfd);
+    friend class MainWindow;
+    friend class pictureserver;
 
 private:
     QSet<QTcpSocket*> clients;

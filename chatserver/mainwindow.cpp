@@ -4,6 +4,7 @@
 #include <QTextStream>
 #include <logindialog.h>
 #include <QMessageBox>
+#include <QDateTime>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -51,17 +52,19 @@ void MainWindow::PicreadyRead()
 {
     do
     {
-        written_bytes += picsocket->bytesAvailable();
+        written_bytes += picsocket->bytesToWrite();
         ar.append(picsocket->readAll());
 
     }while(picsocket->bytesAvailable());
 
     if(written_bytes >= expected_bytes)
     {
-        QFile img("D:/client_tmp.png");
-        img.open(QFile::Truncate | QFile::WriteOnly);
-        img.write(ar);
-        ar.clear();
+        //QFile img(get_cp_picname());
+        //img.open(QFile::Truncate | QFile::WriteOnly);
+        //img.write(ar);
+        //img.close();
+        //ar.clear();
+        picserver->dispatchPic(ar);
     }
 }
 
@@ -189,25 +192,30 @@ void MainWindow::getPicName()
     QFile file(picName);
     file.open(QFile::ReadOnly);
     data.append(file.readAll());
+    QTime dat_time;
+    QString tmp_picname = QApplication::applicationDirPath() + "/" + dat_time.currentTime().toString("HH_mm_ss") + ".png";
+    //QString tmp_picname = "D:/server_tmptmp.png";
+    set_cp_picname(tmp_picname);
     QString newFileName = QString(picName.data() + picName.lastIndexOf("/") + 1);
     QString newName = QApplication::applicationDirPath() + "/" + newFileName;
 #ifdef CHAT_CLIENT
     editor->append(username + ": ");
-    editor->append(QString("<img src=\"%1\" />").arg(picName));
-    socket->write(QString("<img src=\"%1\" />").arg(picName).toAscii());
-    picserver->expected_bytes = file.size();
-    picserver->written_size = 0;
+    editor->append(QString("<img src=\"%1\" />").arg(get_cp_picname()));
+    socket->write(QString("<img src=\"%1\" />").arg(get_cp_picname()).toAscii());
+    expected_bytes = file.size();
+    written_bytes = 0;
     picsocket->write(data);
     picsocket->flush();
     picsocket->waitForBytesWritten();
 #else
-    QString s_with_servername = QString(server_name) + ": " +QString("<img src=\"%1\" />").arg(picName);
+    QString s_with_servername = QString(server_name) + ": " +QString("<img src=\"%1\" />").arg(get_cp_picname());
     editor->append(s_with_servername);
     server->dispatchLine(s_with_servername);
-    expected_bytes = file.size();
-    written_bytes = 0;
-    //picserver->dispatchPic(data);
+    //picserver->expected_bytes = file.size();
+    //picserver->written_size = 0;
+    picserver->dispatchPic(data);
 #endif
+    file.close();
 }
 
 void MainWindow::setupPic()

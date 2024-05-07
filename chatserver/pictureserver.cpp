@@ -1,6 +1,10 @@
 #include "pictureserver.h"
 #include <QTcpSocket>
 #include <QFile>
+#include <chatserver.h>
+#include <mainwindow.h>
+
+extern MainWindow *w;
 pictureserver::pictureserver(QObject *parent) :
     QTcpServer(parent)
 {
@@ -30,9 +34,12 @@ void pictureserver::readyRead()
     }while(client->bytesAvailable() > 0);
     if(written_size >= expected_bytes)
     {
-        QFile img("D:/server_tmp.png");
+        QFile img(w->get_cp_picname());
         img.open(QFile::Truncate | QFile::WriteOnly);
         img.write(ba);
+        //dispatchPic(ba);
+        img.close();
+        //client->reset();
         ba.clear();
     }
 }
@@ -46,12 +53,12 @@ void pictureserver::disconnected()
     users.remove(client);
 }
 
-void pictureserver::dispatchPic(QByteArray &ba)
+void pictureserver::dispatchPic(QByteArray ba)
 {
-    for(QTcpSocket *client: clients)
+    w->expected_bytes = ba.size();
+    foreach(QTcpSocket *client, clients)
     {
-        expected_bytes = ba.size();
-        written_size = 0;
+        w->written_bytes = 0;
         client->write(ba);
         client->flush();
         client->waitForBytesWritten();

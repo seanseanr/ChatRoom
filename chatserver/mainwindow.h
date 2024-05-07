@@ -28,6 +28,10 @@ public:
     void appendEditorFromclient(QString s);
     ChatServer *server;
     pictureserver *picserver;
+    qint64 expected_bytes;
+    qint64 written_bytes;
+    QString get_cp_picname(){return cp_picname;}
+    void set_cp_picname(QString s){cp_picname = s;}
 #define server_name "BigOne"
 
 private slots:
@@ -51,6 +55,7 @@ private:
     void setupPic();
     QString fileName;
     int tmp_idx = 0;
+    QString cp_picname;
     //QString PicName;
     QTextEdit *editor;
     QLineEdit *lineditor;
@@ -65,8 +70,6 @@ private:
     };
     QAction *act[_TOTALACTIONS];
     QByteArray ar;
-    qint64 expected_bytes;
-    qint64 written_bytes;
 };
 
 #endif // MAINWINDOW_H

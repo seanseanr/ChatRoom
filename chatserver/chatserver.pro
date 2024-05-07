@@ -10,7 +10,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = chatserver
 TEMPLATE = app
-#DEFINES += CHAT_CLIENT
+DEFINES += CHAT_CLIENT
 
 SOURCES += main.cpp\
         mainwindow.cpp \

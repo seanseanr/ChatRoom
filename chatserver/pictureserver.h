@@ -3,8 +3,8 @@
 
 #include <QTcpServer>
 #include <QImage>
-
 //class ChatServer;
+
 
 class pictureserver : public QTcpServer
 {
@@ -13,7 +13,7 @@ public:
     explicit pictureserver(QObject *parent = 0);
     ~pictureserver();
     void add_username(QString &s){pendingUserName = s;}
-    void dispatchPic(QByteArray &ba);
+    void dispatchPic(QByteArray ba);
     qint64 expected_bytes;
     qint64 written_size;
 private:
