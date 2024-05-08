@@ -34,11 +34,11 @@ void pictureserver::readyRead()
     }while(client->bytesAvailable() > 0);
     if(written_size >= expected_bytes)
     {
-        QFile img(w->get_cp_picname());
-        img.open(QFile::Truncate | QFile::WriteOnly);
-        img.write(ba);
-        //dispatchPic(ba);
-        img.close();
+        //QFile img(w->get_cp_picname());
+        //img.open(QFile::Truncate | QFile::WriteOnly);
+        //img.write(ba);
+        dispatchPic(ba);
+        //img.close();
         //client->reset();
         ba.clear();
     }

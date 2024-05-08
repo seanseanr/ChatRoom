@@ -43,7 +43,7 @@ void ChatServer::readyRead()
             w->appendEditorFromclient(s);
             foreach(QTcpSocket *socket, clients)
             {
-                if(socket != client)
+                //if(socket != client)
                 {
                     QString username_ = users[client] + ": ";
                     socket->write((username_+line).toAscii());

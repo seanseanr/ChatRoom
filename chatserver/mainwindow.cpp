@@ -59,12 +59,11 @@ void MainWindow::PicreadyRead()
 
     if(written_bytes >= expected_bytes)
     {
-        //QFile img(get_cp_picname());
-        //img.open(QFile::Truncate | QFile::WriteOnly);
-        //img.write(ar);
-        //img.close();
-        //ar.clear();
-        picserver->dispatchPic(ar);
+        QFile img(get_cp_picname());
+        img.open(QFile::Truncate | QFile::WriteOnly);
+        img.write(ar);
+        img.close();
+        ar.clear();
     }
 }
 
@@ -151,7 +150,7 @@ void MainWindow::newMeDisplay()
     if(!lineditor->text().isEmpty())
     {
         QString s = username + ": " + lineditor->text();
-        editor->append(s);
+        //editor->append(s);
         //socket->write(s.toAscii());
         socket->write(lineditor->text().toAscii());
     }
@@ -193,17 +192,17 @@ void MainWindow::getPicName()
     file.open(QFile::ReadOnly);
     data.append(file.readAll());
     QTime dat_time;
-    QString tmp_picname = QApplication::applicationDirPath() + "/" + dat_time.currentTime().toString("HH_mm_ss") + ".png";
+    QString tmp_picname = QApplication::applicationDirPath() + "/" + dat_time.currentTime().toString("HH_mm_ss") + QString(picName.data() + picName.lastIndexOf("."));
     //QString tmp_picname = "D:/server_tmptmp.png";
     set_cp_picname(tmp_picname);
     QString newFileName = QString(picName.data() + picName.lastIndexOf("/") + 1);
     QString newName = QApplication::applicationDirPath() + "/" + newFileName;
 #ifdef CHAT_CLIENT
-    editor->append(username + ": ");
-    editor->append(QString("<img src=\"%1\" />").arg(get_cp_picname()));
+    //editor->append(username + ": ");
+    //editor->append(QString("<img src=\"%1\" />").arg(get_cp_picname()));
     socket->write(QString("<img src=\"%1\" />").arg(get_cp_picname()).toAscii());
-    expected_bytes = file.size();
-    written_bytes = 0;
+    picserver->expected_bytes = file.size();
+    picserver->written_size = 0;
     picsocket->write(data);
     picsocket->flush();
     picsocket->waitForBytesWritten();
