@@ -7,11 +7,11 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QAction>
-#include <myhighlighter.h>
-#include <QVBoxLayout>
-#include <QLineEdit>
+#include "myhighlighter.h"
 #include "chatserver.h"
 #include "pictureserver.h"
+#include <QVBoxLayout>
+#include <QLineEdit>
 namespace Ui {
 class MainWindow;
 }

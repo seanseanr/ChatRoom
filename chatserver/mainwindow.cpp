@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QFileDialog>
 #include <QTextStream>
-#include <logindialog.h>
+#include "logindialog.h"
 #include <QMessageBox>
 #include <QDateTime>
 

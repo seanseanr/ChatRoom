@@ -1,8 +1,8 @@
 #include "pictureserver.h"
 #include <QTcpSocket>
 #include <QFile>
-#include <chatserver.h>
-#include <mainwindow.h>
+#include "chatserver.h"
+#include "mainwindow.h"
 
 extern MainWindow *w;
 pictureserver::pictureserver(QObject *parent) :

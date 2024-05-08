@@ -22,7 +22,7 @@ static const uint qt_meta_data_MainWindow[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-       5,   14, // methods
+       8,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -34,14 +34,18 @@ static const uint qt_meta_data_MainWindow[] = {
       22,   11,   11,   11, 0x08,
       33,   11,   11,   11, 0x08,
       48,   11,   11,   11, 0x08,
-      60,   11,   11,   11, 0x08,
+      61,   11,   11,   11, 0x08,
+      73,   11,   11,   11, 0x08,
+      85,   11,   11,   11, 0x08,
+     100,   11,   11,   11, 0x08,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_MainWindow[] = {
     "MainWindow\0\0newFile()\0saveFile()\0"
-    "newMeDisplay()\0readyRead()\0connected()\0"
+    "newMeDisplay()\0getPicName()\0readyRead()\0"
+    "connected()\0Picconnected()\0PicreadyRead()\0"
 };
 
 void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -53,8 +57,11 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 0: _t->newFile(); break;
         case 1: _t->saveFile(); break;
         case 2: _t->newMeDisplay(); break;
-        case 3: _t->readyRead(); break;
-        case 4: _t->connected(); break;
+        case 3: _t->getPicName(); break;
+        case 4: _t->readyRead(); break;
+        case 5: _t->connected(); break;
+        case 6: _t->Picconnected(); break;
+        case 7: _t->PicreadyRead(); break;
         default: ;
         }
     }
@@ -93,9 +100,9 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 5)
+        if (_id < 8)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 5;
+        _id -= 8;
     }
     return _id;
 }
