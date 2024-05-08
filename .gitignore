@@ -38,4 +38,5 @@
 *.png
 *.jpg
 *.jpeg
-
+# specific directory
+chatserver-build-desktop-Qt_4_8_7__4_8_7-X86-64__Debug
