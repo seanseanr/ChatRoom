@@ -12,17 +12,17 @@ TARGET = chatserver_server
 TEMPLATE = app
 #DEFINES += CHAT_CLIENT
 
-SOURCES += ../chatserver/main.cpp\
-        ../chatserver/mainwindow.cpp \
-        ../chatserver/myhighlighter.cpp \
-    ../chatserver/chatserver.cpp \
-    ../chatserver/logindialog.cpp \
-    ../chatserver/pictureserver.cpp
+SOURCES += main.cpp\
+        mainwindow.cpp \
+        myhighlighter.cpp \
+    chatserver.cpp \
+    logindialog.cpp \
+    pictureserver.cpp
 
-HEADERS  += ../chatserver/mainwindow.h \
-        ../chatserver/myhighlighter.h \
-    ../chatserver/chatserver.h \
-    ../chatserver/logindialog.h \
-    ../chatserver/pictureserver.h
+HEADERS  += mainwindow.h \
+        myhighlighter.h \
+    chatserver.h \
+    logindialog.h \
+    pictureserver.h
 
-FORMS    += ../chatserver/mainwindow.ui
+FORMS    += mainwindow.ui
