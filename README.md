@@ -1,8 +1,8 @@
 # ChatRoom
-Develop QT Networking Chat Room-server side
+Develop QT Networking Chat Room-server and client
 
 SPECIFICATION:
-1. Create a Chat Room in Server Side
+1. Create a Chat Room both server side and client side
 2. One server thread can handle many client request
 3. With one Chat Room Board could show multi-uer chat message
 4. With one message input edit that is ready to show in the Board

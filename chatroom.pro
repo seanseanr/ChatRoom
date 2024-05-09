@@ -1,5 +1,5 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-	chatserver_server \
-	chatserver
+	chat_server \
+	chat_client
