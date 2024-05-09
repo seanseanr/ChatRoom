@@ -5,7 +5,8 @@
 #include "logindialog.h"
 #include <QMessageBox>
 #include <QDateTime>
-
+#include <QTextCodec>
+#include <QTextEncoder>
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -59,6 +60,7 @@ void MainWindow::PicreadyRead()
 
     if(written_bytes >= expected_bytes)
     {
+        qDebug()<<"get_cp_picname"<<get_cp_picname();
         QFile img(get_cp_picname());
         img.open(QFile::Truncate | QFile::WriteOnly);
         img.write(ar);
@@ -71,7 +73,11 @@ void MainWindow::connected()
 {
     //if(!loggined)
     //{
-        if(socket->write(QString(LOGIN_SIGN + username).toAscii()) >=0)
+        QTextCodec *c = QTextCodec::codecForName("UTF-8");
+        QTextEncoder *codec = c->makeEncoder(QTextCodec::IgnoreHeader);
+        QByteArray sendData = codec->fromUnicode(LOGIN_SIGN + username);
+
+        if(socket->write(sendData) >=0)
         {
             socket->waitForBytesWritten();
             //loggined = true;
@@ -150,9 +156,12 @@ void MainWindow::newMeDisplay()
     if(!lineditor->text().isEmpty())
     {
         QString s = username + ": " + lineditor->text();
-        //editor->append(s);
         //socket->write(s.toAscii());
-        socket->write(lineditor->text().toAscii());
+        QTextCodec *c = QTextCodec::codecForName("UTF-8");
+        QTextEncoder *codec = c->makeEncoder(QTextCodec::IgnoreHeader);
+        QByteArray sendData = codec->fromUnicode(lineditor->text());
+        socket->write(sendData);
+        //socket->write(lineditor->text().toAscii());
     }
 #else
     if(!lineditor->text().isEmpty())
