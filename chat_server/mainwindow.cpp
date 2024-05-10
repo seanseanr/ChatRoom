@@ -32,7 +32,6 @@ MainWindow::MainWindow(QWidget *parent) :
     loginDialog->close();
     #endif
     server = new ChatServer(this);
-    picserver = new pictureserver(this);
     setupFilemenu();
     setupEditor();
 #ifdef CHAT_CLIENT
@@ -199,34 +198,34 @@ void MainWindow::getPicName()
     QString tmp_picname = QApplication::applicationDirPath() + "/" + dat_time.currentTime().toString("HH_mm_ss") + QString(picName.data() + picName.lastIndexOf("."));
     //QString tmp_picname = "D:/server_tmptmp.png";
     set_cp_picname(tmp_picname);
-    QString newFileName = QString(picName.data() + picName.lastIndexOf("/") + 1);
-    QString newName = QApplication::applicationDirPath() + "/" + newFileName;
+    //QString newFileName = QString(picName.data() + picName.lastIndexOf("/") + 1);
+    //QString newName = QApplication::applicationDirPath() + "/" + newFileName;
 #ifdef CHAT_CLIENT
     //editor->append(username + ": ");
     //editor->append(QString("<img src=\"%1\" />").arg(get_cp_picname()));
     socket->write(QString("<img src=\"%1\" />").arg(get_cp_picname()).toUtf8());
-    picserver->expected_bytes = file.size();
-    picserver->written_size = 0;
-    picsocket->write(data);
-    picsocket->flush();
-    picsocket->waitForBytesWritten();
+    socket->write(data);
+    socket->flush();
+    socket->waitForBytesWritten();
 #else
     QString s_with_servername = QString(server_name) + ": " +QString("<img src=\"%1\" />").arg(get_cp_picname());
     editor->append(s_with_servername);
     server->dispatchLine(s_with_servername);
     //picserver->expected_bytes = file.size();
     //picserver->written_size = 0;
-    picserver->dispatchPic(data);
+    server->dispatchPic(data);
 #endif
     file.close();
 }
 
 void MainWindow::setupPic()
 {
+#ifdef CHAT_CLIENT
     act[_OPENACTION] = new QAction("Select Picture", this);
     connect(act[_OPENACTION], SIGNAL(triggered()) , this, SLOT(getPicName()));
     menu->addAction(act[_OPENACTION]);
     //editor->append("<img src=copy.png /img>");
+#endif
 }
 
 void MainWindow::appendEditorFromclient(QString s)

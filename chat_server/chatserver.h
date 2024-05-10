@@ -3,7 +3,6 @@
 
 #include <QTcpServer>
 
-
 class ChatServer : public QTcpServer
 {
     Q_OBJECT
@@ -11,6 +10,8 @@ public:
     explicit ChatServer(QObject *parent = 0);
 #define LOGIN_SIGN "LOGIN1234:"
 #define SIGN_LEN sizeof(LOGIN_SIGN)
+#define TS_PIC_SIGN "PIC1234:"
+#define TS_PIC_SIGN_LEN sizeof(TS_PIC_SIGN)
     ~ChatServer();
     void dispatchLine(QString line);
     
@@ -21,7 +22,11 @@ protected:
 
 private:
     QSet<QTcpSocket*> clients;
-    QMap<QTcpSocket*, QString> users;
+    QMap<QTcpSocket*, QPair<QString, bool> > users;
+    QByteArray ba;
+    qint64 expected_bytes;
+    qint64 written_size;
+    void dispatchPic(QByteArray ba);
 
 signals:
     void message_signal(QString msg);

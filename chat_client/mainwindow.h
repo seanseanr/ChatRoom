@@ -24,6 +24,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     bool loggined = false;
+    bool waitforpic = false;
     QString username;
     void appendEditorFromclient(QString s);
     ChatServer *server;
@@ -43,8 +44,6 @@ private slots:
     void getPicName();
     void readyRead();
     void connected();
-    void Picconnected();
-    void PicreadyRead();
 
 private:
     Ui::MainWindow *ui;

@@ -55,10 +55,10 @@ void pictureserver::disconnected()
 
 void pictureserver::dispatchPic(QByteArray ba)
 {
-    w->expected_bytes = ba.size();
+    //w->expected_bytes = ba.size();
     foreach(QTcpSocket *client, clients)
     {
-        w->written_bytes = 0;
+        //w->written_bytes = 0;
         client->write(ba);
         client->flush();
         client->waitForBytesWritten();

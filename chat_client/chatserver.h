@@ -11,6 +11,8 @@ public:
     explicit ChatServer(QObject *parent = 0);
 #define LOGIN_SIGN "LOGIN1234:"
 #define SIGN_LEN sizeof(LOGIN_SIGN)
+#define TS_PIC_SIGN "PIC1234:"
+#define TS_PIC_SIGN_LEN sizeof(TS_PIC_SIGN)
     ~ChatServer();
     void dispatchLine(QString line);
     
