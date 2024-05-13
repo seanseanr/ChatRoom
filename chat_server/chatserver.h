@@ -14,6 +14,7 @@ public:
 #define TS_PIC_SIGN_LEN sizeof(TS_PIC_SIGN)
     ~ChatServer();
     void dispatchLine(QString line);
+    void qt_wait_ms(qint32 amount);
     
 protected:
     void incomingConnection(int socketfd);

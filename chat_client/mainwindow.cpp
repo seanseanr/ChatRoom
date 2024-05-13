@@ -7,7 +7,10 @@
 #include <QDateTime>
 #include <QTextCodec>
 #include <QTextEncoder>
-
+#include <QElapsedTimer>
+#include <QCoreApplication>
+#include <QTimer>
+#include <QEventLoop>
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -72,26 +75,43 @@ void MainWindow::readyRead()
     {
         do
         {
-            written_bytes += socket->bytesToWrite();
+            written_bytes += socket->bytesAvailable();
             ar.append(socket->readAll());
         }while(socket->bytesAvailable());
         if(written_bytes >= expected_bytes)
         {
+            QTime time;
+            QString tmp_picname = QApplication::applicationDirPath() + "/" + time.currentTime().toString("HH_mm_ss") + QString(picName.data() + picName.lastIndexOf("."));
+            set_cp_picname(tmp_picname);
+            arr = codec->fromUnicode(QString("<img src=\"%1\" />").arg(get_cp_picname()));
             QFile img(get_cp_picname());
             img.open(QFile::Truncate | QFile::WriteOnly);
             img.write(ar);
             img.close();
             ar.clear();
             waitforpic = false;
+            socket->write(arr);
+            socket->flush();
+            socket->waitForBytesWritten();
+            return;
         }
     }
     else
     {
-        do
+        QString line = QString::fromUtf8(socket->readLine().trimmed());
+        if(line.contains(TS_PIC_SIGN))
         {
-            QString line = QString::fromUtf8(socket->readLine().trimmed());
+            QString tailed_s = QString(line.data() + TS_PIC_SIGN_LEN - 1);
+            expected_bytes = tailed_s.toInt();
+            written_bytes = 0;
+            waitforpic = true;
+            return;
+        }
+        editor->append(line);
+        while(socket->canReadLine())
+        {
             editor->append(line);
-        }while(socket->canReadLine());
+        }
     }
 }
 
@@ -179,7 +199,7 @@ void MainWindow::saveFile()
 void MainWindow::getPicName()
 {
     QByteArray data;
-    QString picName = QFileDialog::getOpenFileName(this, "Select Picture", "D:\\", "Picture File (*.png *.jpg *.bmp)");
+    picName = QFileDialog::getOpenFileName(this, "Select Picture", "D:\\", "Picture File (*.png *.jpg *.bmp)");
     if(picName.isEmpty())
         return;
     QFile file(picName);
@@ -187,37 +207,55 @@ void MainWindow::getPicName()
     data.append(file.readAll());
     QTime dat_time;
     QString tmp_picname = QApplication::applicationDirPath() + "/" + dat_time.currentTime().toString("HH_mm_ss") + QString(picName.data() + picName.lastIndexOf("."));
-    //QString tmp_picname = "D:/server_tmptmp.png";
     set_cp_picname(tmp_picname);
-    QString newFileName = QString(picName.data() + picName.lastIndexOf("/") + 1);
-    QString newName = QApplication::applicationDirPath() + "/" + newFileName;
+    //QString newFileName = QString(picName.data() + picName.lastIndexOf("/") + 1);
+    //QString newName = QApplication::applicationDirPath() + "/" + newFileName;
 #ifdef CHAT_CLIENT
-    QTextCodec *c = QTextCodec::codecForName("UTF-8");
-    QTextEncoder *codec = c->makeEncoder(QTextCodec::IgnoreHeader);
-    QByteArray arr = codec->fromUnicode(QString("<img src=\"%1\" />").arg(get_cp_picname()));
+    c = QTextCodec::codecForName("UTF-8");
+    codec = c->makeEncoder(QTextCodec::IgnoreHeader);
+    arr = codec->fromUnicode(QString("<img src=\"%1\" />").arg(get_cp_picname()));
     QString number = QString("%1").arg(file.size());
+    //qt_wait_ms(1);
     //QByteArray pic_ar = codec->fromUnicode(TS_PIC_SIGN + number);
     socket->write(QString(TS_PIC_SIGN + number + '\0').toAscii());
     socket->flush();
     socket->waitForBytesWritten();
+    qt_wait_ms(1);
     socket->write(data);
     socket->flush();
     socket->waitForBytesWritten();
-    waitforpic = true;
-    expected_bytes = file.size();
-    written_bytes = 0;
-    //socket->waitForReadyRead();
-    socket->write(arr);
-    socket->flush();
-    socket->waitForBytesWritten();
+    qt_wait_ms(1);
     file.close();
+    qt_wait_ms(1);
+    editor->update();
+    //waitforpic = true;
+    //expected_bytes = file.size();
+    //written_bytes = 0;
+    //socket->waitForReadyRead();
 #else
     QString s_with_servername = QString(server_name) + ": " +QString("<img src=\"%1\" />").arg(get_cp_picname());
     editor->append(s_with_servername);
     server->dispatchLine(s_with_servername);
     dispatchPic(data);
 #endif
-    file.close();
+}
+
+void MainWindow::qt_wait_ms(qint32 amount)
+{
+#if 1
+    QElapsedTimer t;
+    t.start();
+    while(t.elapsed()<amount*1000)
+    QCoreApplication::processEvents();
+#else
+    QTimer timer;
+    //        timer.setSingleShot(true);
+    timer.setInterval(amount*1);
+    QEventLoop loop;
+    connect(&timer, SIGNAL(timeout()), &loop, SLOT(quit()));
+    timer.start();
+    loop.exec();
+#endif
 }
 
 void MainWindow::setupPic()

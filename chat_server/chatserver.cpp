@@ -2,6 +2,10 @@
 #include "mainwindow.h"
 #include <QTcpSocket>
 #include <QString>
+#include <QTimer>
+#include <QEventLoop>
+#include <QElapsedTimer>
+#include <QCoreApplication>
 
 class MainWindow;
 extern MainWindow* w;
@@ -45,7 +49,8 @@ void ChatServer::readyRead()
                 {
                     if(line.contains(TS_PIC_SIGN))
                     {
-                        QString tmp_S =QString(line.data() + TS_PIC_SIGN_LEN - 1).toAscii();
+                        QString tmp_S =QString(line.data() + TS_PIC_SIGN_LEN - 1);
+                        qDebug()<<"tmp_S:"<<tmp_S;
                         expected_bytes = tmp_S.toInt();
                         written_size = 0;
                         users[client].second = true;
@@ -68,27 +73,52 @@ void ChatServer::readyRead()
         {
             while(client->bytesAvailable())
             {
-                written_size += client->bytesToWrite();
+                written_size += client->bytesAvailable();
+                qDebug()<<"Bytes written:"<<written_size;
                 ba.append(client->readAll());
 
-            };
+            }
             if(written_size >= expected_bytes)
             {
                 dispatchPic(ba);
-                users[client].second = false;
                 ba.clear();
             }
+            users[client].second = false;
         }
 }
 
 void ChatServer::dispatchPic(QByteArray ba)
-{
+{   
     foreach(QTcpSocket *client, clients)
     {
+        QString num = QString("%1").arg(ba.size());
+        qDebug()<<"dispatchPic:"<<num;
+        client->write(QString(TS_PIC_SIGN + num + '\0').toAscii());
+        client->flush();
+        client->waitForBytesWritten();
+        qt_wait_ms(1);
         client->write(ba);
         client->flush();
         client->waitForBytesWritten();
     }
+}
+
+void ChatServer::qt_wait_ms(qint32 amount)
+{
+#if 1
+    QElapsedTimer t;
+    t.start();
+    while(t.elapsed()<amount*1000)
+    QCoreApplication::processEvents();
+#else
+    QTimer timer;
+    timer.setSingleShot(true);
+    timer.setInterval(amount*1);
+    QEventLoop loop;
+    connect(&timer, SIGNAL(timeout()), &loop, SLOT(quit()));
+    timer.start();
+    loop.exec();
+#endif
 }
 
 void ChatServer::disconnected()
