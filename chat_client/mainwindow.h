@@ -36,7 +36,7 @@ public:
     qint64 written_bytes;
     QString get_cp_picname(){return cp_picname;}
     void set_cp_picname(QString s){cp_picname = s;}
-    void qt_wait_ms(qint32 amount);
+    void qt_wait_ms(float amount);
 #define server_name "BigOne"
 
 private slots:

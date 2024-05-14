@@ -54,6 +54,12 @@ void ChatServer::readyRead()
                         expected_bytes = tmp_S.toInt();
                         written_size = 0;
                         users[client].second = true;
+                        for(QTcpSocket *socket: clients)
+                        {
+                            socket->write(QString(users[client].first + ": ").toUtf8());
+                            socket->flush();
+                            socket->waitForBytesWritten();
+                        }
                         return;
                     }
                     else
@@ -80,10 +86,10 @@ void ChatServer::readyRead()
             }
             if(written_size >= expected_bytes)
             {
+                users[client].second = false;
                 dispatchPic(ba);
                 ba.clear();
             }
-            users[client].second = false;
         }
 }
 
@@ -96,20 +102,22 @@ void ChatServer::dispatchPic(QByteArray ba)
         client->write(QString(TS_PIC_SIGN + num + '\0').toAscii());
         client->flush();
         client->waitForBytesWritten();
-        qt_wait_ms(1);
+        qt_wait_ms(0.5);
         client->write(ba);
         client->flush();
         client->waitForBytesWritten();
     }
 }
 
-void ChatServer::qt_wait_ms(qint32 amount)
+void ChatServer::qt_wait_ms(float amount)
 {
 #if 1
     QElapsedTimer t;
     t.start();
     while(t.elapsed()<amount*1000)
-    QCoreApplication::processEvents();
+    {
+        QCoreApplication::processEvents();
+    }
 #else
     QTimer timer;
     timer.setSingleShot(true);
