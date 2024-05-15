@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent) :
         socket = new QTcpSocket(this);
         connect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
         connect(socket, SIGNAL(connected()), this, SLOT(connected()));
-        socket->connectToHost("192.168.90.171", 5000);
+        socket->connectToHost("192.168.90.79", 5000);
     }
     else
     {
