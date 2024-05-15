@@ -9,7 +9,6 @@
 #include <QAction>
 #include "myhighlighter.h"
 #include "chatserver.h"
-#include "pictureserver.h"
 #include <QVBoxLayout>
 #include <QLineEdit>
 namespace Ui {
@@ -27,7 +26,6 @@ public:
     QString username;
     void appendEditorFromclient(QString s);
     ChatServer *server;
-    pictureserver *picserver;
     qint64 expected_bytes;
     qint64 written_bytes;
     QString get_cp_picname(){return cp_picname;}

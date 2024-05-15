@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    #ifdef CHAT_CLIENT
+#ifdef CHAT_CLIENT
     LoginDialog *loginDialog = new LoginDialog(this);
     loginDialog->setModal(true);
     loginDialog->exec();
@@ -30,8 +30,9 @@ MainWindow::MainWindow(QWidget *parent) :
         username.clear();
     }
     loginDialog->close();
-    #endif
+#else
     server = new ChatServer(this);
+#endif
     setupFilemenu();
     setupEditor();
 #ifdef CHAT_CLIENT
@@ -152,9 +153,6 @@ void MainWindow::newMeDisplay()
 #ifdef CHAT_CLIENT
     if(!lineditor->text().isEmpty())
     {
-        QString s = username + ": " + lineditor->text();
-        //editor->append(s);
-        //socket->write(s.toAscii());
         socket->write(lineditor->text().toAscii());
     }
 #else
@@ -196,13 +194,8 @@ void MainWindow::getPicName()
     data.append(file.readAll());
     QTime dat_time;
     QString tmp_picname = QApplication::applicationDirPath() + "/" + dat_time.currentTime().toString("HH_mm_ss") + QString(picName.data() + picName.lastIndexOf("."));
-    //QString tmp_picname = "D:/server_tmptmp.png";
     set_cp_picname(tmp_picname);
-    //QString newFileName = QString(picName.data() + picName.lastIndexOf("/") + 1);
-    //QString newName = QApplication::applicationDirPath() + "/" + newFileName;
 #ifdef CHAT_CLIENT
-    //editor->append(username + ": ");
-    //editor->append(QString("<img src=\"%1\" />").arg(get_cp_picname()));
     socket->write(QString("<img src=\"%1\" />").arg(get_cp_picname()).toUtf8());
     socket->write(data);
     socket->flush();
@@ -211,8 +204,6 @@ void MainWindow::getPicName()
     QString s_with_servername = QString(server_name) + ": " +QString("<img src=\"%1\" />").arg(get_cp_picname());
     editor->append(s_with_servername);
     server->dispatchLine(s_with_servername);
-    //picserver->expected_bytes = file.size();
-    //picserver->written_size = 0;
     server->dispatchPic(data);
 #endif
     file.close();
@@ -224,7 +215,6 @@ void MainWindow::setupPic()
     act[_OPENACTION] = new QAction("Select Picture", this);
     connect(act[_OPENACTION], SIGNAL(triggered()) , this, SLOT(getPicName()));
     menu->addAction(act[_OPENACTION]);
-    //editor->append("<img src=copy.png /img>");
 #endif
 }
 

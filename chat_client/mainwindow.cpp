@@ -16,27 +16,26 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    #ifdef CHAT_CLIENT
+#ifdef CHAT_CLIENT
     LoginDialog *loginDialog = new LoginDialog(this);
     loginDialog->setModal(true);
     loginDialog->exec();
-    //loginDialog->show();
-    //if(loginDialog->username.isEmpty())
     if(!loginDialog->username.isEmpty())
     {
         username = loginDialog->username;
         socket = new QTcpSocket(this);
         connect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
         connect(socket, SIGNAL(connected()), this, SLOT(connected()));
-        socket->connectToHost(QHostAddress::LocalHost, 5000);
+        socket->connectToHost("192.168.90.171", 5000);
     }
     else
     {
         username.clear();
     }
     loginDialog->close();
-    #endif
+#else
     server = new ChatServer(this);
+#endif
     setupFilemenu();
     setupEditor();
 #ifdef CHAT_CLIENT
@@ -122,14 +121,17 @@ void MainWindow::setupEditor()
     QWidget *centralWidget = new QWidget();
     editor = new QTextEdit;
     lineditor = new QLineEdit;
+    lineditor2 = new QLineEdit;
+    lbl_msg = new QLabel("Enter message:", this);
+    lbl_user = new QLabel("Enter user to highlight:", this);
     editor->setFont(QFont("courier"));
     editor->setFontPointSize(10);
     editor->setReadOnly(true);
     editor->setFixedHeight(175);
 #ifdef CHAT_CLIENT
-    MyHighlighter *highlighter = new MyHighlighter(editor->document(), username);
+    highlighter = new MyHighlighter(editor->document(), username, "");
 #else
-    MyHighlighter *highlighter = new MyHighlighter(editor->document(), server_name);
+    highlighter = new MyHighlighter(editor->document(), server_name, "");
 #endif
     lineditor->setFont(QFont("courier"));
     lineditor->setMinimumSize(10, 10);
@@ -138,9 +140,13 @@ void MainWindow::setupEditor()
     vblayout = new QVBoxLayout(centralWidget);
 
     vblayout->addWidget(editor);
+    vblayout->addWidget(lbl_msg);
     vblayout->addWidget(lineditor);
+    vblayout->addWidget(lbl_user);
+    vblayout->addWidget(lineditor2);
     setCentralWidget(centralWidget);
     connect(lineditor, SIGNAL(editingFinished()), this, SLOT(newMeDisplay()));
+    connect(lineditor2, SIGNAL(editingFinished()), this, SLOT(newUserHighLight()));
 }
 
 void MainWindow::setupFilemenu()
@@ -162,13 +168,10 @@ void MainWindow::newMeDisplay()
 #ifdef CHAT_CLIENT
     if(!lineditor->text().isEmpty())
     {
-        QString s = username + ": " + lineditor->text();
-        //socket->write(s.toAscii());
         QTextCodec *c = QTextCodec::codecForName("UTF-8");
         QTextEncoder *codec = c->makeEncoder(QTextCodec::IgnoreHeader);
         QByteArray sendData = codec->fromUnicode(lineditor->text());
         socket->write(sendData);
-        //socket->write(lineditor->text().toAscii());
     }
 #else
     if(!lineditor->text().isEmpty())
@@ -179,6 +182,18 @@ void MainWindow::newMeDisplay()
     }
 #endif
     lineditor->clear();
+}
+
+void MainWindow::newUserHighLight()
+{
+    if(!lineditor2->text().isEmpty())
+    {
+        if(highlighter && (lineditor2->text().trimmed()!=username))
+        {
+            delete highlighter;
+            highlighter = new MyHighlighter(editor->document(), username, lineditor2->text().trimmed());
+        }
+    }
 }
 
 void MainWindow::newFile()
@@ -201,6 +216,10 @@ void MainWindow::saveFile()
 void MainWindow::getPicName()
 {
     QByteArray data;
+    if(waitforpic)
+    {
+        return;
+    }
     picName = QFileDialog::getOpenFileName(this, "Select Picture", "D:\\", "Picture File (*.png *.jpg *.bmp)");
     if(picName.isEmpty())
         return;

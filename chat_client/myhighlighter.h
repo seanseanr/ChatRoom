@@ -9,8 +9,8 @@
 class MyHighlighter : public QSyntaxHighlighter
 {
 public:
-    QString HiUser = QString();
-    explicit MyHighlighter(QTextDocument* parent = 0, const QString &k = QString()): QSyntaxHighlighter(parent) {keyword = k;}
+    //explicit MyHighlighter(QTextDocument* parent = 0, const QString &k = QString()): QSyntaxHighlighter(parent) {keyword = k;}
+    explicit MyHighlighter(QTextDocument* parent = 0, const QString &k = QString(), const QString &h = QString()): QSyntaxHighlighter(parent) {keyword = k; HiUser = h;}
     void updateHiUser(QString hiuser){HiUser = hiuser;}
 protected:
     void highlightBlock(const QString& text)
@@ -42,11 +42,10 @@ protected:
             setFormat(index, HiUserLength, HiUserFormat);
             index = text.indexOf(HiUserPattern, index + HiUserLength);
         }
-
-
     }
 
 private:
+    QString HiUser = QString();
     QString keyword;
 };
 

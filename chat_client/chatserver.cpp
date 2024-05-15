@@ -35,7 +35,6 @@ void ChatServer::readyRead()
         {
             QString username = QString(line.data() + SIGN_LEN - 1).toUtf8();
             users[client] = username;
-            w->picserver->add_username(username);
         }
         else
         {

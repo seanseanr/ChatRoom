@@ -9,11 +9,11 @@
 #include <QAction>
 #include "myhighlighter.h"
 #include "chatserver.h"
-#include "pictureserver.h"
 #include <QVBoxLayout>
 #include <QLineEdit>
 #include <QTextCodec>
 #include <QTextEncoder>
+#include <QLabel>
 
 namespace Ui {
 class MainWindow;
@@ -31,7 +31,6 @@ public:
     QString username;
     void appendEditorFromclient(QString s);
     ChatServer *server;
-    pictureserver *picserver;
     qint64 expected_bytes;
     qint64 written_bytes;
     QString get_cp_picname(){return cp_picname;}
@@ -43,6 +42,7 @@ private slots:
     void newFile();
     void saveFile();
     void newMeDisplay();
+    void newUserHighLight();
     //void transferPic();
     //void receivePic();
     void getPicName();
@@ -60,8 +60,12 @@ private:
     int tmp_idx = 0;
     QString cp_picname;
     //QString PicName;
+    MyHighlighter *highlighter;
     QTextEdit *editor;
     QLineEdit *lineditor;
+    QLineEdit *lineditor2;
+    QLabel *lbl_msg;
+    QLabel *lbl_user;
     QVBoxLayout *vblayout;
     QMenu *menu;
     QMenuBar *menuBar;

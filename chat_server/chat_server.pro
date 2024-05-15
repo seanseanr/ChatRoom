@@ -16,13 +16,11 @@ SOURCES += main.cpp\
         mainwindow.cpp \
         myhighlighter.cpp \
     chatserver.cpp \
-    logindialog.cpp \
-    pictureserver.cpp
+    logindialog.cpp
 
 HEADERS  += mainwindow.h \
         myhighlighter.h \
     chatserver.h \
-    logindialog.h \
-    pictureserver.h
+    logindialog.h
 
 FORMS    += mainwindow.ui

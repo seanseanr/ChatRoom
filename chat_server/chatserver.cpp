@@ -13,7 +13,7 @@ extern MainWindow* w;
 ChatServer::ChatServer(QObject *parent) :
     QTcpServer(parent)
 {
-    listen(QHostAddress::LocalHost, 5000);
+    listen(QHostAddress::Any, 5000);
 }
 
 void ChatServer::incomingConnection(int socketfd)
