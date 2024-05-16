@@ -185,6 +185,7 @@ void MainWindow::saveFile()
 
 void MainWindow::getPicName()
 {
+#if 0
     QByteArray data;
     QString picName = QFileDialog::getOpenFileName(this, "Select Picture", "D:\\", "Picture File (*.png *.jpg *.bmp)");
     if(picName.isEmpty())
@@ -207,6 +208,7 @@ void MainWindow::getPicName()
     server->dispatchPic(data);
 #endif
     file.close();
+#endif
 }
 
 void MainWindow::setupPic()

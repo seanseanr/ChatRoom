@@ -49,17 +49,17 @@ void ChatServer::readyRead()
                 {
                     if(line.contains(TS_PIC_SIGN))
                     {
-                        QString tmp_S =QString(line.data() + TS_PIC_SIGN_LEN - 1);
-                        qDebug()<<"tmp_S:"<<tmp_S;
-                        expected_bytes = tmp_S.toInt();
+                        num_s =QString(line.data() + TS_PIC_SIGN_LEN - 1);
+                        //qDebug()<<"tmp_S:"<<tmp_S;
+                        expected_bytes = num_s.toInt();
                         written_size = 0;
-                        users[client].second = true;
                         for(QTcpSocket *socket: clients)
                         {
                             socket->write(QString(users[client].first + ": ").toUtf8());
                             socket->flush();
                             socket->waitForBytesWritten();
                         }
+                        users[client].second = true;
                         return;
                     }
                     else
@@ -75,7 +75,7 @@ void ChatServer::readyRead()
                 }
             }while(client->canReadLine());
         }
-        else
+        if(users[client].second)
         {
             while(client->bytesAvailable())
             {
@@ -94,7 +94,7 @@ void ChatServer::readyRead()
 }
 
 void ChatServer::dispatchPic(QByteArray ba)
-{   
+{
     foreach(QTcpSocket *client, clients)
     {
         QString num = QString("%1").arg(ba.size());
@@ -102,7 +102,7 @@ void ChatServer::dispatchPic(QByteArray ba)
         client->write(QString(TS_PIC_SIGN + num + '\0').toAscii());
         client->flush();
         client->waitForBytesWritten();
-        qt_wait_ms(0.5);
+        qt_wait_ms(0.01);
         client->write(ba);
         client->flush();
         client->waitForBytesWritten();
@@ -116,7 +116,7 @@ void ChatServer::qt_wait_ms(float amount)
     t.start();
     while(t.elapsed()<amount*1000)
     {
-        QCoreApplication::processEvents();
+        //QCoreApplication::processEvents();
     }
 #else
     QTimer timer;

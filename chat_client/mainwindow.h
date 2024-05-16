@@ -57,6 +57,7 @@ private:
     void setupServer();
     void setupPic();
     QString fileName;
+    QString tailed_s;
     int tmp_idx = 0;
     QString cp_picname;
     //QString PicName;

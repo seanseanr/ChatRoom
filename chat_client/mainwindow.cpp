@@ -81,10 +81,10 @@ void MainWindow::readyRead()
         {
             QTime time;
             QString tmp_picname = QApplication::applicationDirPath() + "/" + time.currentTime().toString("HH_mm_ss_zzz") + QString(picName.data() + picName.lastIndexOf("."));
-            QTextCodec *c = QTextCodec::codecForName("UTF-8");
-            QTextEncoder *codec = c->makeEncoder(QTextCodec::IgnoreHeader);
-            arr = codec->fromUnicode(tmp_picname);
-            set_cp_picname(arr);
+            //QTextCodec *c = QTextCodec::codecForName("UTF-8");
+            //QTextEncoder *codec = c->makeEncoder(QTextCodec::IgnoreHeader);
+            //arr = codec->fromUnicode(tmp_picname);
+            set_cp_picname(tmp_picname);
             waitforpic = false;
             QString tmp_tag = QString("<img src=\"%1\" />").arg(get_cp_picname());
             QFile img(get_cp_picname());
@@ -92,7 +92,7 @@ void MainWindow::readyRead()
             img.write(ar);
             img.close();
             editor->append(tmp_tag);
-            qt_wait_ms(0.5);
+            //qt_wait_ms(0.5);
 
             return;
         }
@@ -102,10 +102,10 @@ void MainWindow::readyRead()
         QString line = QString::fromUtf8(socket->readLine().trimmed());
         if(line.contains(TS_PIC_SIGN))
         {
-            QString tailed_s = QString(line.data() + TS_PIC_SIGN_LEN - 1);
+            tailed_s = QString(line.data() + TS_PIC_SIGN_LEN - 1);
+            waitforpic = true;
             expected_bytes = tailed_s.toInt();
             written_bytes = 0;
-            waitforpic = true;
             return;
         }
         editor->append(line);
@@ -232,18 +232,18 @@ void MainWindow::getPicName()
     socket->write(QString(TS_PIC_SIGN + number + '\0').toAscii());
     socket->flush();
     socket->waitForBytesWritten();
-    qt_wait_ms(0.5);
+    qt_wait_ms(0.01);
     socket->write(data);
     socket->flush();
     socket->waitForBytesWritten();
-    qt_wait_ms(0.5);
-    file.close();
+    //qt_wait_ms(0.01);
 #else
     QString s_with_servername = QString(server_name) + ": " +QString("<img src=\"%1\" />").arg(get_cp_picname());
     editor->append(s_with_servername);
     server->dispatchLine(s_with_servername);
     dispatchPic(data);
 #endif
+    file.close();
 }
 
 void MainWindow::qt_wait_ms(float amount)
@@ -253,7 +253,7 @@ void MainWindow::qt_wait_ms(float amount)
     t.start();
     while(t.elapsed()<amount*1000)
     {
-        QCoreApplication::processEvents();
+        //QCoreApplication::processEvents();
     }
 #else
     QTimer timer;
