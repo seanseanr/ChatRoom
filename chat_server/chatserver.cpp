@@ -37,22 +37,24 @@ void ChatServer::readyRead()
         {
             do
             {
-                QString line = QString::fromUtf8(client->readLine());
+                tokdat.append(client->readAll());
 
-                if(line.contains(LOGIN_SIGN))
+                if(tokdat.indexOf(LOGIN_SIGN) == 0)
                 {
-                    QString username = QString(line.data() + SIGN_LEN - 1);
+                    QString username = QString::fromUtf8(tokdat.data() + SIGN_LEN - 1);
                     users[client].first = username;
                     users[client].second = false;
+                    tokdat.clear();
                 }
                 else
                 {
-                    if(line.contains(TS_PIC_SIGN))
+                    if(tokdat.indexOf(TS_PIC_SIGN) == 0)
                     {
-                        num_s =QString(line.data() + TS_PIC_SIGN_LEN - 1);
-                        //qDebug()<<"tmp_S:"<<tmp_S;
-                        expected_bytes = num_s.toInt();
-                        written_size = 0;
+                        num_s = QString(tokdat.data() + TS_PIC_SIGN_LEN - 1);
+                        qDebug()<<"num_s:"<<num_s;
+                        expected_bytes = num_s.toInt() + TS_PIC_SIGN_LEN + num_s.length();
+                        written_size = tokdat.size();
+                        //ba.setRawData(tokdat.data() + TS_PIC_SIGN_LEN + num_s.length(), written_size);
                         for(QTcpSocket *socket: clients)
                         {
                             socket->write(QString(users[client].first + ": ").toUtf8());
@@ -60,20 +62,21 @@ void ChatServer::readyRead()
                             socket->waitForBytesWritten();
                         }
                         users[client].second = true;
-                        return;
+                        break;
                     }
                     else
                     {
-                        QString s = users[client].first + ": " + line;
+                        QString s = users[client].first + ": " + QString::fromUtf8(tokdat.data());
                         w->appendEditorFromclient(s);
                         foreach(QTcpSocket *socket, clients)
                         {
                             QString username_ = users[client].first + ": ";
-                            socket->write((username_+line).toUtf8());
+                            socket->write(s.toUtf8());
                         }
+                        tokdat.clear();
                     }
                 }
-            }while(client->canReadLine());
+            }while(client->bytesAvailable());
         }
         if(users[client].second)
         {
@@ -81,14 +84,15 @@ void ChatServer::readyRead()
             {
                 written_size += client->bytesAvailable();
                 qDebug()<<"Bytes written:"<<written_size;
-                ba.append(client->readAll());
+                tokdat.append(client->readAll());
 
             }
             if(written_size >= expected_bytes)
             {
                 users[client].second = false;
-                dispatchPic(ba);
-                ba.clear();
+                dispatchPic(tokdat);
+                //ba.clear();
+                tokdat.clear();
             }
         }
 }
@@ -97,13 +101,12 @@ void ChatServer::dispatchPic(QByteArray ba)
 {
     foreach(QTcpSocket *client, clients)
     {
-        QString num = QString("%1").arg(ba.size());
-        qDebug()<<"dispatchPic:"<<num;
-        client->write(QString(TS_PIC_SIGN + num + '\0').toAscii());
-        client->flush();
-        client->waitForBytesWritten();
-        qt_wait_ms(0.01);
-        client->write(ba);
+        //tokdat.clear();
+        //QString num = QString("%1").arg(ba.size());
+        //qDebug()<<"dispatchPic:"<<num;
+        //tokdat.append(QString(TS_PIC_SIGN + num + '\0'));
+        //tokdat.append(ba);
+        client->write(tokdat);
         client->flush();
         client->waitForBytesWritten();
     }

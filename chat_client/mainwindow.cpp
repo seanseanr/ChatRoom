@@ -57,6 +57,8 @@ void MainWindow::connected()
         if(socket->write(sendData) >=0)
         {
             socket->waitForBytesWritten();
+            ar.clear();
+            tokdat.clear();
         }
         else
         {
@@ -70,17 +72,39 @@ void MainWindow::connected()
 
 void MainWindow::readyRead()
 {
+    if(waitforpic == false)
+    {
+        ar.append(socket->readAll());
+        if(ar.contains(TS_PIC_SIGN))
+        {
+            tailed_s = QString(ar.data() + ar.indexOf(TS_PIC_SIGN) + TS_PIC_SIGN_LEN - 1);
+            waitforpic = true;
+            expected_bytes = ar.indexOf(TS_PIC_SIGN) + tailed_s.toInt() + TS_PIC_SIGN_LEN + tailed_s.length();
+            written_bytes = ar.size();
+            editor->append(QString::fromUtf8(ar,ar.indexOf(TS_PIC_SIGN)));
+            //ar = ar.setRawData(ar.data() + ar.indexOf(TS_PIC_SIGN), tailed_s.toInt());
+        }
+        else
+        {
+            editor->append(QString::fromUtf8(ar));
+            while(socket->canReadLine())
+            {
+                editor->append(QString::fromUtf8(socket->readLine()));
+            }
+            ar.clear();
+        }
+    }
     if(waitforpic)
     {
-        do
+        while(socket->bytesAvailable())
         {
             written_bytes += socket->bytesAvailable();
             ar.append(socket->readAll());
-        }while(socket->bytesAvailable());
+        };
         if(written_bytes >= expected_bytes)
         {
             QTime time;
-            QString tmp_picname = QApplication::applicationDirPath() + "/" + time.currentTime().toString("HH_mm_ss_zzz") + QString(picName.data() + picName.lastIndexOf("."));
+            QString tmp_picname = QApplication::applicationDirPath() + "/" + time.currentTime().toString("HH_mm_ss_zzz");
             //QTextCodec *c = QTextCodec::codecForName("UTF-8");
             //QTextEncoder *codec = c->makeEncoder(QTextCodec::IgnoreHeader);
             //arr = codec->fromUnicode(tmp_picname);
@@ -89,29 +113,14 @@ void MainWindow::readyRead()
             QString tmp_tag = QString("<img src=\"%1\" />").arg(get_cp_picname());
             QFile img(get_cp_picname());
             img.open(QFile::Truncate | QFile::WriteOnly);
+            ar = ar.setRawData(ar.data() + ar.indexOf(TS_PIC_SIGN) + TS_PIC_SIGN_LEN + tailed_s.length(), tailed_s.toInt());
             img.write(ar);
             img.close();
             editor->append(tmp_tag);
             //qt_wait_ms(0.5);
-
+            ar.clear();
+            tokdat.clear();
             return;
-        }
-    }
-    else
-    {
-        QString line = QString::fromUtf8(socket->readLine().trimmed());
-        if(line.contains(TS_PIC_SIGN))
-        {
-            tailed_s = QString(line.data() + TS_PIC_SIGN_LEN - 1);
-            waitforpic = true;
-            expected_bytes = tailed_s.toInt();
-            written_bytes = 0;
-            return;
-        }
-        editor->append(line);
-        while(socket->canReadLine())
-        {
-            editor->append(line);
         }
     }
 }
@@ -220,6 +229,7 @@ void MainWindow::getPicName()
     {
         return;
     }
+    //tokdat.clear();
     picName = QFileDialog::getOpenFileName(this, "Select Picture", "D:\\", "Picture File (*.png *.jpg *.bmp)");
     if(picName.isEmpty())
         return;
@@ -228,15 +238,15 @@ void MainWindow::getPicName()
     data.append(file.readAll());
 #ifdef CHAT_CLIENT
     QString number = QString("%1").arg(file.size());
-    ar.clear();
-    socket->write(QString(TS_PIC_SIGN + number + '\0').toAscii());
+    tokdat.append(QString(TS_PIC_SIGN + number + '\0'));
+    tokdat.append(data);
+    int tokdat_size = tokdat.size();
+    qDebug()<<"tokdat_size:"<<tokdat_size<<"address:"<<&tokdat;
+    socket->write(tokdat);
     socket->flush();
     socket->waitForBytesWritten();
-    qt_wait_ms(0.01);
-    socket->write(data);
-    socket->flush();
-    socket->waitForBytesWritten();
-    //qt_wait_ms(0.01);
+    //ar.clear();
+    //tokdat.clear();
 #else
     QString s_with_servername = QString(server_name) + ": " +QString("<img src=\"%1\" />").arg(get_cp_picname());
     editor->append(s_with_servername);
@@ -272,6 +282,8 @@ void MainWindow::setupPic()
     connect(act[_OPENACTION], SIGNAL(triggered()) , this, SLOT(getPicName()));
     menu->addAction(act[_OPENACTION]);
     waitforpic = false;
+    ar.clear();
+    tokdat.clear();
     //editor->append("<img src=copy.png /img>");
 }
 

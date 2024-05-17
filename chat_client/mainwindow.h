@@ -14,6 +14,8 @@
 #include <QTextCodec>
 #include <QTextEncoder>
 #include <QLabel>
+#include <QList>
+
 
 namespace Ui {
 class MainWindow;
@@ -82,6 +84,7 @@ private:
     QString picName;
     QTextCodec *c;
     QTextEncoder *codec;
+    QByteArray tokdat;
 };
 
 #endif // MAINWINDOW_H
