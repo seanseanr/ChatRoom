@@ -11,11 +11,14 @@ int main(int argc, char *argv[])
     if(w->username.isEmpty())
     {
         w->close();
+        delete w;
+        a.deleteLater();
     }
     else
     {
-
     }
-#endif
     return a.exec();
+#else
+    return a.exec();
+#endif
 }
